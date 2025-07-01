@@ -60,6 +60,7 @@ for row in rows:
 # thrid approach via API key
 # SerpAPI, free plan with 100 searches/month
 
+
 import os
 from dotenv import load_dotenv
 from serpapi import GoogleSearch
