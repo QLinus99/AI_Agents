@@ -2,11 +2,14 @@ import os
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 from langchain.agents import AgentType
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.chat_models import ChatOllama
 import pandas as pd
 import numpy as np
 import random
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import google.generativeai as genai
 
 np.random.seed(42)
 
@@ -44,7 +47,10 @@ df.info()
 df.describe()
 
 
-llm = ChatOllama(model="mistral", temperature=0.7) 
+load_dotenv(dotenv_path="/home/linus/Documents/VS_Code/AI_Agents/keys.env") 
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", temperature=0.7)
 
 agent = create_pandas_dataframe_agent(
     llm,
@@ -56,18 +62,15 @@ print("Data Analysis Agent is ready. You can now ask questions about the data.")
 
 
 def ask_agent(question):
-    response = agent.invoke({
-        "input": question,
-        "agent_scratchpad": f"Human: {question}\nAI: To answer this question, I need to use Python to analyze the dataframe. I'll use the python_repl_ast tool.\n\nAction: python_repl_ast\nAction Input: ",
-    },
-    config={"handle_parsing_errors": True}                        
-                           )
-    
+    response = agent.invoke(
+        {"input": question},
+        config={"handle_parsing_errors": True}
+    )
     print(f"Question: {question}")
     print(f"Answer: {response}")
     print("---")
 
 
-ask_agent("What are the column names in this dataset?")
+#ask_agent("What are the column names in this dataset?")
 #ask_agent("How many rows are in this dataset?")
-#ask_agent("What is the average price of cars sold?")
+ask_agent("What is the average price of cars sold?")
